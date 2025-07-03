@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Model 3 Ward Demand Prediction - Mom Pharmacy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    .model-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(46,125,50,0.08), 0 1.5px 6px rgba(46,125,50,0.06);
+      padding: 32px 28px 28px 28px;
+      max-width: 480px;
+      margin: 40px auto 32px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .model-card h2 {
+      color: #2e7d32;
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .model-card p {
+      color: #444;
+      font-size: 1.08rem;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .prediction-form label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+      color: #2e7d32;
+    }
+    .prediction-form input,
+    .prediction-form select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .prediction-form fieldset {
+      background: #f0f8e9;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 20px;
+      padding: 18px 12px 10px 12px;
+    }
+    .prediction-form legend {
+      font-weight: 700;
+      color: #2e7d32;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .submit-button {
+      background-color: #2e7d32;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      width: 100%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    .submit-button:hover {
+      background-color: #fbc02d;
+      color: #333;
+    }
+    .result-box {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(46,125,50,0.10);
+    }
+    .result-low { background: #d4edda; color: #155724; }
+    .result-medium { background: #fff3cd; color: #856404; }
+    .result-high { background: #f8d7da; color: #721c24; }
+    .loading-spinner {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      color: #2e7d32;
+      font-weight: 700;
+    }
+    .try-again-button {
+      display: block;
+      margin: 18px auto 0 auto;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .try-again-button:hover {
+      background-color: #fbc02d;
+      color: #333;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('ward-demand-form');
+      const resultBox = document.getElementById('result-box');
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const tryAgainBtn = document.getElementById('try-again-btn');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        resultBox.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+        resultBox.className = 'result-box';
+
+        // Basic validation
+        const criticalRate = parseFloat(form.critical_rate.value);
+        if (isNaN(criticalRate) || criticalRate < 0 || criticalRate > 1) {
+          loadingSpinner.style.display = 'none';
+          resultBox.textContent = 'Critical Rate must be between 0 and 1.';
+          resultBox.className = 'result-box result-high';
+          resultBox.style.display = 'block';
+          return;
+        }
+        // Add more validation as needed
+
+        const data = {
+          critical_rate: criticalRate,
+          platelet_count: parseInt(form.platelet_count.value),
+          age: parseInt(form.age.value),
+          temperature: parseFloat(form.temperature.value),
+          humidity: parseFloat(form.humidity.value),
+          rainfall: parseFloat(form.rainfall.value),
+          total_cases: parseInt(form.total_cases.value),
+          ward: form.ward.value
+        };
+
+        try {
+          const response = await fetch('/predict_model3', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+          loadingSpinner.style.display = 'none';
+
+          if (result.error) {
+            resultBox.textContent = 'Error: ' + result.error;
+            resultBox.className = 'result-box result-high';
+          } else {
+            let demandText = '';
+            let demandClass = '';
+            if (result.demand_level === 'Low') {
+              demandText = 'Low Demand';
+              demandClass = 'result-low';
+            } else if (result.demand_level === 'Medium') {
+              demandText = 'Medium Demand';
+              demandClass = 'result-medium';
+            } else {
+              demandText = 'High Demand';
+              demandClass = 'result-high';
+            }
+            resultBox.textContent = 'Predicted Demand Level: ' + demandText;
+            resultBox.className = 'result-box ' + demandClass;
+          }
+          resultBox.style.display = 'block';
+        } catch (error) {
+          loadingSpinner.style.display = 'none';
+          resultBox.textContent = 'Error: Unable to get prediction.';
+          resultBox.className = 'result-box result-high';
+          resultBox.style.display = 'block';
+        }
+      });
+
+      tryAgainBtn.addEventListener('click', function () {
+        resultBox.style.display = 'none';
+        form.reset();
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo-container">
+      <img src="https://th.bing.com/th/id/OIP.4Z-oPW1kE7HyUxFXqH7ckwAAAA?o=7rm=3&rs=1&pid=ImgDetMain" alt="Mom Pharmacy Logo" class="logo" />
+    </div>
+    <nav class="nav-menu">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('predict_outcome') }}">Outcome Prediction</a>
+      <a href="{{ url_for('predict_high_risk') }}">High Risk Flag</a>
+      <a href="{{ url_for('predict_ward_demand') }}">Ward Demand Prediction</a>
+      <a href="{{ url_for('competitive_research') }}" style="background:#fbc02d;color:#2e7d32;font-weight:bold;padding:6px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(46,125,50,0.10);margin-left:8px;">Competitive Research</a>
+      <a href="#">Insights</a>
+      <a href="#">About Developer</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="model-card">
+      <h2>Model 3: Ward Demand Prediction</h2>
+      <p>Predict the demand level (Low, Medium, High) for a hospital ward based on patient and environmental features. Enter the details below to get an instant prediction.</p>
+      <form id="ward-demand-form" class="prediction-form">
+        <fieldset>
+          <legend>Ward Features</legend>
+          <label>Critical Rate (0-1):
+            <input type="number" name="critical_rate" min="0" max="1" step="0.01" required />
+          </label>
+          <label>Platelet Count:
+            <input type="number" name="platelet_count" min="0" required />
+          </label>
+          <label>Age:
+            <input type="number" name="age" min="0" max="120" required />
+          </label>
+          <label>Temperature (°C):
+            <input type="number" name="temperature" min="15" max="50" step="0.1" required />
+          </label>
+          <label>Humidity (%):
+            <input type="number" name="humidity" min="0" max="100" step="0.1" required />
+          </label>
+          <label>Rainfall (mm):
+            <input type="number" name="rainfall" min="0" step="0.1" required />
+          </label>
+          <label>Total Cases:
+            <input type="number" name="total_cases" min="0" required />
+          </label>
+          <label>Ward:
+            <select name="ward" required>
+              {% for w in wards %}
+              <option value="{{ w }}">{{ w }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </fieldset>
+        <button type="submit" class="submit-button">Predict Demand Level</button>
+      </form>
+      <div id="loading-spinner" class="loading-spinner">Loading...</div>
+      <div id="result-box" class="result-box"></div>
+      <button id="try-again-btn" class="try-again-button">Try Again</button>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div>© 2025 Mom Pharmacy</div>
+    <div>
+      Powered by AI | <a href="mailto:contact@mompharmacy.com">Contact</a> | 
+      <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </div>
+  </footer>
+</body>
+</html> 

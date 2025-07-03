@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mom Pharmacy AI Healthcare Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="icon" href="https://th.bing.com/th/id/OIP.4Z-oPW1kE7HyUxFXqH7ckwAAAA?o=7rm=3&rs=1&pid=ImgDetMain" />
+  <style>
+    .model-cards-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+      margin: 40px 0;
+    }
+    .model-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(46,125,50,0.08), 0 1.5px 6px rgba(46,125,50,0.06);
+      padding: 32px 28px 28px 28px;
+      max-width: 340px;
+      min-width: 260px;
+      flex: 1 1 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .model-card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 8px 32px rgba(46,125,50,0.16), 0 3px 12px rgba(46,125,50,0.12);
+    }
+    .model-card .icon {
+      font-size: 3.2rem;
+      margin-bottom: 18px;
+      color: #2e7d32;
+    }
+    .model-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.35rem;
+      color: #2e7d32;
+      font-weight: 700;
+    }
+    .model-card p {
+      color: #444;
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .model-card .cta-button {
+      margin-top: auto;
+      width: 100%;
+      font-size: 1.08rem;
+    }
+    .model-card .coming-soon {
+      color: #fbc02d;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+    .hero-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      background: linear-gradient(90deg, #2e7d32 60%, #fbc02d 100%);
+      border-radius: 16px;
+      padding: 48px 32px;
+      color: white;
+      box-shadow: 0 4px 10px rgba(46,125,50,0.12);
+      margin-bottom: 40px;
+      justify-content: space-between;
+    }
+    .hero-text {
+      flex: 1 1 400px;
+      max-width: 600px;
+    }
+    .hero-text h1 {
+      font-size: 2.7rem;
+      margin-bottom: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .hero-text p {
+      font-size: 1.2rem;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    .hero-image {
+      flex: 1 1 300px;
+      min-width: 220px;
+      min-height: 180px;
+      background: url('https://images.unsplash.com/photo-1588776814546-1a1a1a1a1a1a?auto=format&fit=crop&w=800&q=80') no-repeat center center;
+      background-size: cover;
+      border-radius: 12px;
+      margin-left: 32px;
+      height: 220px;
+      box-shadow: 0 2px 8px rgba(46,125,50,0.10);
+    }
+    @media (max-width: 900px) {
+      .hero-section { flex-direction: column; padding: 32px 10px; }
+      .hero-image { margin-left: 0; margin-top: 24px; width: 100%; }
+    }
+    @media (max-width: 600px) {
+      .model-cards-section { flex-direction: column; gap: 18px; }
+      .model-card { max-width: 100%; min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo-container">
+      <img src="https://th.bing.com/th/id/OIP.4Z-oPW1kE7HyUxFXqH7ckwAAAA?o=7rm=3&rs=1&pid=ImgDetMain" alt="Mom Pharmacy Logo" class="logo" />
+    </div>
+    <nav class="nav-menu">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('predict_outcome') }}">Predict Outcome</a>
+      <a href="{{ url_for('predict_high_risk') }}">High Risk Prediction</a>
+      <a href="{{ url_for('predict_ward_demand') }}">Ward Demand Prediction</a>
+      <a href="{{ url_for('competitive_research') }}" style="background:#fbc02d;color:#2e7d32;font-weight:bold;padding:6px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(46,125,50,0.10);margin-left:8px;">Competitive Research</a>
+      <a href="{{ url_for('insights') }}">Insights</a>
+      <a href="#">About Developer</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <div class="hero-text">
+        <h1>Empowering Healthcare with AI</h1>
+        <p>Instantly predict dengue patient outcomes and risk levels with our advanced AI models. Built for Mom Pharmacy by our in-house AI Engineer.</p>
+        <a href="#models" class="cta-button" style="font-size:1.15rem;">Try Prediction Tool</a>
+      </div>
+      <div class="hero-image"></div>
+    </section>
+
+    <section id="models" class="model-cards-section">
+      <div class="model-card">
+        <div class="icon">🩺</div>
+        <h3>Model 1: Outcome Prediction</h3>
+        <p>Predicts the likely outcome for a dengue patient: Recovered, Hospitalized, Critical, or Dead. Uses patient vitals, symptoms, and demographics.</p>
+        <a href="{{ url_for('predict_outcome') }}" class="cta-button">Try Now</a>
+      </div>
+      <div class="model-card">
+        <div class="icon">⚠️</div>
+        <h3>Model 2: High Risk Prediction</h3>
+        <p>Identifies if a patient is at high risk (Critical/Dead) based on their current condition and symptoms. Fast, reliable, and actionable.</p>
+        <a href="{{ url_for('predict_high_risk') }}" class="cta-button">Try Now</a>
+      </div>
+      <div class="model-card">
+        <div class="icon">📊</div>
+        <h3>Model 3: Demand & Resource Forecast</h3>
+        <p>Coming soon: Predicts ward-level demand and resource needs for better hospital management and planning.</p>
+        <a href="{{ url_for('predict_ward_demand') }}" class="cta-button">Try Now</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>© 2025 Mom Pharmacy</div>
+    <div>
+      Powered by AI | <a href="mailto:contact@mompharmacy.com">Contact</a> | 
+      <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </div>
+  </footer>
+</body>
+</html>
