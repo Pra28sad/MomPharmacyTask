@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_file
 import numpy as np
 import pickle
 import os
@@ -168,6 +168,10 @@ def insights():
 def competitive_research():
     # Serve the competitive research PDF page
     return render_template('competitive_research.html')
+
+@app.route('/download-pbix')
+def download_pbix():
+    return send_file('DengueDataReport.pbix', as_attachment=True)
 
 # Ensure the PDF is accessible via static route
 @app.route('/static/<path:filename>')
